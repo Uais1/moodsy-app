@@ -12,6 +12,11 @@
         .emoji { font-size: 24px; }
         .username { font-weight: bold; }
         .ai-comment { color: #555; margin-top: 10px; font-style: italic; }
+        .form { background: #ffffff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .form textarea { width: 100%; height: 60px; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; resize: none; }
+        .form .emojis span { cursor: pointer; font-size: 24px; margin: 0 5px; }
+        .form button { margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
+        .form button:hover { background: #0056b3; }
     </style>
 </head>
 <body>
@@ -20,19 +25,61 @@
         <p>Твое настроение — важно</p>
     </div>
 
-    <div class="card">
-        <div class="emoji">😊</div>
-        <div class="username">Uais</div>
-        <div class="post">Сегодня проснулся с ощущением, что всё возможно. Хочу обнять весь мир!</div>
-        <div class="ai-comment">Твоя радость заразительна. Продолжай делиться светом!</div>
+    <div class="form">
+        <div class="emojis">
+            <span onclick="selectEmoji('😊')">😊</span>
+            <span onclick="selectEmoji('😢')">😢</span>
+            <span onclick="selectEmoji('😡')">😡</span>
+            <span onclick="selectEmoji('😍')">😍</span>
+            <span onclick="selectEmoji('😴')">😴</span>
+            <span onclick="selectEmoji('🤯')">🤯</span>
+        </div>
+        <textarea id="postText" placeholder="О чём ты думаешь?"></textarea>
+        <button onclick="addPost()">Опубликовать</button>
     </div>
 
-    <div class="card">
-        <div class="emoji">😢</div>
-        <div class="username">Uais</div>
-        <div class="post">Иногда так пусто внутри, будто мир проходит мимо.</div>
-        <div class="ai-comment">Ты не один. Я рядом — просто дыши.</div>
+    <div id="posts">
+        <!-- Здесь будут появляться посты -->
     </div>
 
+    <script>
+        let selectedEmoji = "";
+
+        function selectEmoji(emoji) {
+            selectedEmoji = emoji;
+        }
+
+        function getAIComment(emoji) {
+            const responses = {
+                '😊': 'Твоя радость заразительна. Продолжай делиться светом!',
+                '😢': 'Ты не один. Я рядом — просто дыши.',
+                '😡': 'Я понимаю тебя. Иногда нужно выговориться.',
+                '😍': 'Любовь — это прекрасно. Береги это чувство.',
+                '😴': 'Тебе нужен отдых. Позволь себе восстановиться.',
+                '🤯': 'Слишком много мыслей? Дай себе паузу.'
+            };
+            return responses[emoji] || 'Я рядом. Говори, что чувствуешь.';
+        }
+
+        function addPost() {
+            const text = document.getElementById("postText").value;
+            if (!text || !selectedEmoji) {
+                alert("Выбери эмоцию и напиши текст.");
+                return;
+            }
+            const postsDiv = document.getElementById("posts");
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `
+                <div class="emoji">${selectedEmoji}</div>
+                <div class="username">Uais</div>
+                <div class="post">${text}</div>
+                <div class="ai-comment">${getAIComment(selectedEmoji)}</div>
+            `;
+            postsDiv.prepend(card);
+            document.getElementById("postText").value = "";
+            selectedEmoji = "";
+        }
+    </script>
 </body>
 </html>
