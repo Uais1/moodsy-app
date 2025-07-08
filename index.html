@@ -13,19 +13,21 @@
         .username { font-weight: bold; }
         .ai-comment { color: #555; margin-top: 10px; font-style: italic; }
         .form { background: #ffffff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .form textarea { width: 100%; height: 60px; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; resize: none; }
+        .form textarea, .form input { width: 100%; padding: 10px; font-size: 16px; border-radius: 6px; border: 1px solid #ccc; margin-top: 10px; }
         .form .emojis span { cursor: pointer; font-size: 24px; margin: 0 5px; }
         .form button { margin-top: 10px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; }
         .form button:hover { background: #0056b3; }
+        #talkBox { margin-top: 20px; padding: 15px; background: #fff0f5; border-radius: 8px; display: none; }
     </style>
 </head>
-<body>
+<body onload="loadPosts()">
     <div class="header">
         <h1>🌈 Moodsy</h1>
         <p>Твое настроение — важно</p>
     </div>
 
     <div class="form">
+        <input id="username" placeholder="Твоё имя (например: Uais)" />
         <div class="emojis">
             <span onclick="selectEmoji('😊')">😊</span>
             <span onclick="selectEmoji('😢')">😢</span>
@@ -36,11 +38,11 @@
         </div>
         <textarea id="postText" placeholder="О чём ты думаешь?"></textarea>
         <button onclick="addPost()">Опубликовать</button>
+        <button onclick="talkToMoodsy()">🤖 Поговорить с Moodsy</button>
     </div>
 
-    <div id="posts">
-        <!-- Здесь будут появляться посты -->
-    </div>
+    <div id="talkBox"></div>
+    <div id="posts"></div>
 
     <script>
         let selectedEmoji = "";
@@ -62,23 +64,52 @@
         }
 
         function addPost() {
+            const username = document.getElementById("username").value || "Гость";
             const text = document.getElementById("postText").value;
             if (!text || !selectedEmoji) {
                 alert("Выбери эмоцию и напиши текст.");
                 return;
             }
+            const post = {
+                emoji: selectedEmoji,
+                username: username,
+                text: text,
+                ai: getAIComment(selectedEmoji)
+            };
+            savePost(post);
+            renderPost(post);
+            document.getElementById("postText").value = "";
+            selectedEmoji = "";
+        }
+
+        function savePost(post) {
+            const posts = JSON.parse(localStorage.getItem("moodsyPosts") || "[]");
+            posts.unshift(post);
+            localStorage.setItem("moodsyPosts", JSON.stringify(posts));
+        }
+
+        function loadPosts() {
+            const posts = JSON.parse(localStorage.getItem("moodsyPosts") || "[]");
+            posts.forEach(renderPost);
+        }
+
+        function renderPost(post) {
             const postsDiv = document.getElementById("posts");
             const card = document.createElement("div");
             card.className = "card";
             card.innerHTML = `
-                <div class="emoji">${selectedEmoji}</div>
-                <div class="username">Uais</div>
-                <div class="post">${text}</div>
-                <div class="ai-comment">${getAIComment(selectedEmoji)}</div>
+                <div class="emoji">${post.emoji}</div>
+                <div class="username">${post.username}</div>
+                <div class="post">${post.text}</div>
+                <div class="ai-comment">${post.ai}</div>
             `;
             postsDiv.prepend(card);
-            document.getElementById("postText").value = "";
-            selectedEmoji = "";
+        }
+
+        function talkToMoodsy() {
+            const talkBox = document.getElementById("talkBox");
+            talkBox.innerText = "🤖 Moodsy говорит: Ты не один. Всё наладится. Я рядом. 💙";
+            talkBox.style.display = "block";
         }
     </script>
 </body>
